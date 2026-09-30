@@ -1,0 +1,6 @@
+{
+  "name": "ToolTrunk",
+  "description": "A community tool-sharing platform with a secure, full-stack authentication system, location settings, and reputation tracking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
