@@ -1,26 +1,91 @@
-# 🔧 ToolTrunk
+# ToolTrunk
 
-**ToolTrunk** is a full-stack tool rental and borrowing platform designed to connect tool owners with people who need tools for temporary use.
+**ToolTrunk** is a full-stack tool rental and borrowing platform that allows users to list, discover, rent, and manage tools through a centralized web application.
 
-The project focuses on real-world application architecture, secure authentication, role-based workflows, rental management, and scalable backend infrastructure.
+The platform is designed with a modern full-stack architecture, secure authentication, role-based access, rental management, and scalable backend infrastructure.
 
-## 🚀 Features
+---
 
-* 🔐 JWT-based authentication
-* 👤 Role-based access for Guests, Owners, and Borrowers
-* 🛠️ Tool listing and management
-* 🔎 Browse and discover available tools
-* 📦 Tool rental / borrowing workflow
-* 📊 Dashboard for managing platform activity
-* 📒 Rental ledger and transaction tracking
-* 👤 User profile management
-* ☁️ Cloud-ready architecture
-* ⚡ Redis caching
-* 🐳 Docker containerization
-* 🔒 Environment-based configuration
-* 📱 Responsive and modern UI
+## Features
 
-## 🏗️ Tech Stack
+* User authentication and authorization
+* Role-based access control
+* Tool listing and management
+* Browse and search available tools
+* Tool rental and borrowing workflow
+* Owner and borrower management
+* Rental ledger and transaction tracking
+* User profile management
+* Dashboard for managing platform activity
+* RESTful API integration
+* Redis caching
+* Docker-based development environment
+
+---
+
+## Architecture
+
+ToolTrunk follows a **client-server architecture** with a Next.js frontend communicating with a Node.js/Express REST API.
+
+```text
+                         ┌─────────────────────┐
+                         │      ToolTrunk      │
+                         │     Web Client      │
+                         └──────────┬──────────┘
+                                    │
+                                    │ HTTP / REST API
+                                    ▼
+                         ┌─────────────────────┐
+                         │   Next.js Frontend  │
+                         │ React + Tailwind CSS│
+                         └──────────┬──────────┘
+                                    │
+                                    │ API Requests
+                                    ▼
+                         ┌─────────────────────┐
+                         │   Node.js + Express │
+                         │      REST API       │
+                         └──────┬────────┬─────┘
+                                │        │
+                    ┌───────────┘        └───────────┐
+                    ▼                                ▼
+          ┌─────────────────┐              ┌─────────────────┐
+          │     MongoDB     │              │      Redis      │
+          │   Data Storage  │              │     Caching     │
+          └─────────────────┘              └─────────────────┘
+```
+
+### Architecture Components
+
+**Frontend**
+
+* Next.js
+* React
+* Tailwind CSS
+* Client-side API communication
+
+**Backend**
+
+* Node.js
+* Express.js
+* RESTful APIs
+* JWT authentication
+* Role-based authorization
+
+**Data Layer**
+
+* MongoDB for persistent application data
+* Mongoose for database modeling
+* Redis for caching
+
+**Infrastructure**
+
+* Docker for containerization
+* AWS for cloud infrastructure and deployment
+
+---
+
+## Tech Stack
 
 ### Frontend
 
@@ -28,31 +93,46 @@ The project focuses on real-world application architecture, secure authenticatio
 * React
 * Tailwind CSS
 * JavaScript
+* Axios
 
 ### Backend
 
 * Node.js
 * Express.js
-* MongoDB
-* Mongoose
-* JWT Authentication
 * REST APIs
+* JWT
+* bcrypt
+* Mongoose
 
-### Infrastructure & Tools
+### Database & Caching
 
+* MongoDB
+* MongoDB Atlas
 * Redis
+
+### DevOps & Infrastructure
+
 * Docker
 * AWS
-* Git & GitHub
+* Git
+* GitHub
+
+### Development Tools
+
+* VS Code
 * Postman
 
-## 📁 Project Structure
+---
+
+## Project Structure
 
 ```text
 tooltrunk/
+│
 ├── Frontend/
 │   ├── app/
 │   ├── components/
+│   ├── public/
 │   └── ...
 │
 ├── Backend/
@@ -60,55 +140,114 @@ tooltrunk/
 │   ├── models/
 │   ├── routes/
 │   ├── middleware/
+│   ├── config/
 │   └── ...
 │
 └── README.md
 ```
 
-## ⚙️ Getting Started
+---
 
-### 1. Clone the repository
+## Authentication & Authorization
+
+ToolTrunk uses **JWT-based authentication** to secure protected resources and manage authenticated users.
+
+Role-based authorization is used to control access to platform functionality based on the user's role.
+
+```text
+User
+ │
+ ├── Authentication
+ │       │
+ │       └── JWT
+ │
+ └── Authorization
+         │
+         ├── Owner
+         │
+         └── Borrower
+```
+
+---
+
+## API Architecture
+
+The backend exposes RESTful endpoints for handling application resources and business operations.
+
+```text
+Client
+  │
+  ▼
+REST API
+  │
+  ├── Authentication
+  ├── Users
+  ├── Tools
+  ├── Rentals
+  ├── Ledger
+  └── Dashboard
+  │
+  ▼
+Controllers
+  │
+  ▼
+Models / Services
+  │
+  ▼
+MongoDB / Redis
+```
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+Make sure the following are installed:
+
+* Node.js
+* npm
+* MongoDB or MongoDB Atlas
+* Redis
+* Git
+
+### Clone Repository
 
 ```bash
 git clone https://github.com/muhammadahmed144/tooltrunk.git
+
 cd tooltrunk
 ```
 
-### 2. Install dependencies
-
-Frontend:
-
-```bash
-cd Frontend
-npm install
-```
-
-Backend:
+### Backend Setup
 
 ```bash
 cd Backend
 npm install
 ```
 
-### 3. Configure environment variables
-
-Create `.env` files according to the required configuration.
-
-Example:
+Create a `.env` file inside the backend directory:
 
 ```env
 PORT=5000
 MONGODB_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
-REDIS_URL=your_redis_url
+REDIS_URL=your_redis_connection_string
 ```
-
-### 4. Run the application
 
 Start the backend:
 
 ```bash
 npm run dev
+```
+
+### Frontend Setup
+
+Open a new terminal:
+
+```bash
+cd Frontend
+npm install
 ```
 
 Start the frontend:
@@ -117,59 +256,79 @@ Start the frontend:
 npm run dev
 ```
 
-## 🔐 Authentication
-
-ToolTrunk uses JWT-based authentication to protect private routes and manage authenticated users.
-
-Different user roles provide different capabilities across the platform.
-
-## 🧩 Architecture
-
-The application follows a modern full-stack architecture:
+The application will be available at:
 
 ```text
-Next.js Frontend
-       │
-       ▼
-REST API
-       │
-       ▼
-Node.js + Express
-       │
-   ┌───┴────┐
-   ▼        ▼
-MongoDB   Redis
-       │
-       ▼
-    AWS / Docker
+http://localhost:3000
 ```
-
-## 📌 Project Status
-
-🚧 **Active Development**
-
-ToolTrunk is being developed as a production-focused full-stack project with emphasis on scalable architecture, clean UI, authentication, caching, containerization, and cloud technologies.
-
-## 🎯 Learning & Development Goals
-
-This project is designed to provide practical experience with:
-
-* Full-stack application development
-* REST API architecture
-* Authentication & authorization
-* Database design
-* Redis caching
-* Docker
-* AWS
-* Production-oriented project structure
-* Modern Next.js development
-
-## 👨‍💻 Author
-
-**Muhammad Ahmed Mohsin**
-
-GitHub: [@muhammadahmed144](https://github.com/muhammadahmed144)
 
 ---
 
-⭐ If you find this project useful, consider giving it a star!
+## Environment Variables
+
+The backend requires environment variables for configuration and sensitive credentials.
+
+| Variable      | Description                        |
+| ------------- | ---------------------------------- |
+| `PORT`        | Backend server port                |
+| `MONGODB_URI` | MongoDB connection string          |
+| `JWT_SECRET`  | Secret used for JWT authentication |
+| `REDIS_URL`   | Redis connection URL               |
+
+> Never commit `.env` files or expose sensitive credentials in the repository.
+
+---
+
+## Development Workflow
+
+```text
+Development
+     │
+     ▼
+Git
+     │
+     ▼
+GitHub
+     │
+     ▼
+Docker
+     │
+     ▼
+AWS Infrastructure
+```
+
+The project is structured to support containerized development and cloud-based deployment.
+
+---
+
+## Security
+
+ToolTrunk follows common backend security practices including:
+
+* JWT-based authentication
+* Password hashing with bcrypt
+* Protected API routes
+* Role-based authorization
+* Environment-based secret management
+* CORS configuration
+* Input validation and controlled API access
+
+---
+
+## Project Status
+
+ToolTrunk is an actively developed full-stack application focused on building a practical tool rental and borrowing platform with modern web technologies and scalable backend architecture.
+
+---
+
+## Author
+
+**Muhammad Ahmed Mohsin**
+
+GitHub: **[@muhammadahmed144](https://github.com/muhammadahmed144)**
+
+---
+
+## License
+
+This project is developed for portfolio and educational purposes.
