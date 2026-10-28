@@ -1,53 +1,53 @@
 import crypto from 'crypto';
-import { db } from '../utils/db.js';
+import { getMongoDb } from '../utils/mongo.js';
 
-function mapToolRow(row) {
-  if (!row) return undefined;
+function mapToolDoc(doc) {
+  if (!doc) return undefined;
   let features = [];
   let images = [];
 
   try {
-    if (row.features) {
-      features = typeof row.features === 'string' ? JSON.parse(row.features) : row.features;
+    if (doc.features) {
+      features = typeof doc.features === 'string' ? JSON.parse(doc.features) : doc.features;
     }
   } catch {
     features = [];
   }
 
   try {
-    if (row.images) {
-      images = typeof row.images === 'string' ? JSON.parse(row.images) : row.images;
+    if (doc.images) {
+      images = typeof doc.images === 'string' ? JSON.parse(doc.images) : doc.images;
     }
   } catch {
     images = [];
   }
 
-  if (images.length === 0 && row.image_url) {
-    images = [row.image_url];
+  if (images.length === 0 && (doc.imageUrl || doc.image_url)) {
+    images = [doc.imageUrl || doc.image_url];
   }
 
   return {
-    id: row.id,
-    ownerId: row.owner_id,
-    ownerName: row.owner_name,
-    ownerAvatar: row.owner_avatar,
-    name: row.name,
-    title: row.title || row.name,
-    category: row.category,
-    pricePerDay: Number(row.price_per_day),
-    dailyPoints: Number(row.daily_points || row.price_per_day),
-    rating: Number(row.rating || 5.0),
-    reviewsCount: Number(row.reviews_count || 1),
-    distanceKm: Number(row.distance_km || 1.5),
-    postalCode: row.postal_code,
-    location: row.location || row.postal_code,
-    status: row.status || 'available',
-    imageUrl: row.image_url || (images[0] || ''),
+    id: doc.id,
+    ownerId: doc.owner_id || doc.ownerId,
+    ownerName: doc.owner_name || doc.ownerName,
+    ownerAvatar: doc.owner_avatar || doc.ownerAvatar,
+    name: doc.name,
+    title: doc.title || doc.name,
+    category: doc.category,
+    pricePerDay: Number(doc.price_per_day || doc.pricePerDay),
+    dailyPoints: Number(doc.daily_points || doc.dailyPoints || doc.price_per_day || doc.pricePerDay),
+    rating: Number(doc.rating || 5.0),
+    reviewsCount: Number(doc.reviews_count || doc.reviewsCount || 1),
+    distanceKm: Number(doc.distance_km || doc.distanceKm || 1.5),
+    postalCode: doc.postal_code || doc.postalCode,
+    location: doc.location || doc.postal_code || doc.postalCode,
+    status: doc.status || 'available',
+    imageUrl: doc.image_url || doc.imageUrl || (images[0] || ''),
     images,
-    description: row.description || '',
+    description: doc.description || '',
     features,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
+    createdAt: doc.created_at || doc.createdAt,
+    updatedAt: doc.updated_at || doc.updatedAt,
   };
 }
 
@@ -56,61 +56,63 @@ export class ToolModel {
    * Public discovery endpoint supporting search query, category, and postal code.
    */
   static async findPublic({ search, category, postalCode } = {}) {
-    let sql = 'SELECT * FROM tools WHERE 1=1';
-    const params = [];
+    const db = getMongoDb();
+    const query = {};
 
     if (category && category !== 'All Categories') {
-      sql += ' AND LOWER(category) = LOWER(?)';
-      params.push(category);
+      query.category = { $regex: new RegExp(`^${category}$`, 'i') };
     }
 
     if (postalCode && postalCode.trim()) {
-      sql += ' AND postal_code LIKE ?';
-      params.push(`%${postalCode.trim()}%`);
+      query.postal_code = { $regex: new RegExp(postalCode.trim(), 'i') };
     }
 
     if (search && search.trim()) {
-      const s = `%${search.trim().toLowerCase()}%`;
-      sql += ' AND (LOWER(name) LIKE ? OR LOWER(title) LIKE ? OR LOWER(description) LIKE ? OR LOWER(category) LIKE ?)';
-      params.push(s, s, s, s);
+      const s = search.trim();
+      const regex = new RegExp(s, 'i');
+      query.$or = [
+        { name: regex },
+        { title: regex },
+        { description: regex },
+        { category: regex }
+      ];
     }
 
-    sql += ' ORDER BY created_at DESC';
-
-    const rows = await db.all(sql, params);
-    return rows.map(mapToolRow);
+    const docs = await db.collection('tools').find(query).sort({ created_at: -1 }).toArray();
+    return docs.map(mapToolDoc);
   }
 
   /**
    * Finds all tools owned by a specific user.
    */
   static async findByOwner(ownerId) {
-    const rows = await db.all('SELECT * FROM tools WHERE owner_id = ? ORDER BY created_at DESC', [ownerId]);
-    return rows.map(mapToolRow);
+    const db = getMongoDb();
+    const docs = await db.collection('tools').find({ owner_id: ownerId }).sort({ created_at: -1 }).toArray();
+    return docs.map(mapToolDoc);
   }
 
   /**
    * Finds a single tool by its ID.
    */
   static async findById(id) {
-    const row = await db.get('SELECT * FROM tools WHERE id = ?', [id]);
-    return mapToolRow(row);
+    const db = getMongoDb();
+    const doc = await db.collection('tools').findOne({ id });
+    return mapToolDoc(doc);
   }
 
   /**
-   * Creates a new tool record in the relational database.
+   * Creates a new tool record in MongoDB.
    */
   static async create(toolData) {
+    const db = getMongoDb();
     const id = crypto.randomUUID();
     const now = new Date().toISOString();
     const price = Number(toolData.pricePerDay || toolData.dailyPoints || 500);
     const toolName = (toolData.name || toolData.title || '').trim();
 
-    const featuresJson = JSON.stringify(
-      Array.isArray(toolData.features)
-        ? toolData.features
-        : (typeof toolData.features === 'string' ? toolData.features.split('\n').filter(Boolean) : [])
-    );
+    const featuresArray = Array.isArray(toolData.features)
+      ? toolData.features
+      : (typeof toolData.features === 'string' ? toolData.features.split('\n').filter(Boolean) : []);
 
     const imagesArray = Array.isArray(toolData.images) && toolData.images.length > 0
       ? toolData.images
@@ -118,34 +120,31 @@ export class ToolModel {
 
     const imageUrl = toolData.imageUrl || imagesArray[0];
 
-    await db.run(
-      `INSERT INTO tools (id, owner_id, owner_name, owner_avatar, name, title, category, price_per_day, daily_points, rating, reviews_count, distance_km, postal_code, location, status, image_url, images, description, features, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        id,
-        toolData.ownerId,
-        toolData.ownerName || 'Tool Owner',
-        toolData.ownerAvatar || '',
-        toolName,
-        toolName,
-        (toolData.category || 'Equipment').trim(),
-        price,
-        price,
-        5.0,
-        1,
-        1.5,
-        toolData.postalCode || '75000',
-        toolData.location || toolData.postalCode || '75000',
-        'available',
-        imageUrl,
-        JSON.stringify(imagesArray),
-        toolData.description || '',
-        featuresJson,
-        now,
-        now,
-      ]
-    );
+    const newToolDoc = {
+      id,
+      owner_id: toolData.ownerId,
+      owner_name: toolData.ownerName || 'Tool Owner',
+      owner_avatar: toolData.ownerAvatar || '',
+      name: toolName,
+      title: toolName,
+      category: (toolData.category || 'Equipment').trim(),
+      price_per_day: price,
+      daily_points: price,
+      rating: 5.0,
+      reviews_count: 1,
+      distance_km: 1.5,
+      postal_code: toolData.postalCode || '75000',
+      location: toolData.location || toolData.postalCode || '75000',
+      status: 'available',
+      image_url: imageUrl,
+      images: imagesArray,
+      description: toolData.description || '',
+      features: featuresArray,
+      created_at: now,
+      updated_at: now,
+    };
 
+    await db.collection('tools').insertOne(newToolDoc);
     return await ToolModel.findById(id);
   }
 
@@ -153,6 +152,7 @@ export class ToolModel {
    * Updates an existing tool record. Only the owner can update.
    */
   static async update(id, ownerId, updates) {
+    const db = getMongoDb();
     const existing = await ToolModel.findById(id);
     if (!existing || existing.ownerId !== ownerId) {
       return null;
@@ -165,40 +165,38 @@ export class ToolModel {
     const price = updates.pricePerDay !== undefined ? Number(updates.pricePerDay) : existing.pricePerDay;
     const description = updates.description !== undefined ? updates.description : existing.description;
 
-    let featuresJson = JSON.stringify(existing.features);
+    let featuresArray = existing.features;
     if (updates.features) {
-      featuresJson = JSON.stringify(Array.isArray(updates.features) ? updates.features : []);
+      featuresArray = Array.isArray(updates.features) ? updates.features : [];
     }
 
-    let imagesJson = JSON.stringify(existing.images);
+    let imagesArray = existing.images;
     let imageUrl = existing.imageUrl;
     if (updates.images && Array.isArray(updates.images)) {
-      imagesJson = JSON.stringify(updates.images);
+      imagesArray = updates.images;
       imageUrl = updates.images[0] || imageUrl;
     } else if (updates.imageUrl) {
       imageUrl = updates.imageUrl;
-      imagesJson = JSON.stringify([imageUrl]);
+      imagesArray = [imageUrl];
     }
 
-    await db.run(
-      `UPDATE tools
-       SET name = ?, title = ?, category = ?, status = ?, price_per_day = ?, daily_points = ?, description = ?, features = ?, image_url = ?, images = ?, updated_at = ?
-       WHERE id = ? AND owner_id = ?`,
-      [
-        name,
-        name,
-        category,
-        status,
-        price,
-        price,
-        description,
-        featuresJson,
-        imageUrl,
-        imagesJson,
-        now,
-        id,
-        ownerId,
-      ]
+    await db.collection('tools').updateOne(
+      { id, owner_id: ownerId },
+      {
+        $set: {
+          name,
+          title: name,
+          category,
+          status,
+          price_per_day: price,
+          daily_points: price,
+          description,
+          features: featuresArray,
+          image_url: imageUrl,
+          images: imagesArray,
+          updated_at: now,
+        }
+      }
     );
 
     return await ToolModel.findById(id);
@@ -208,7 +206,8 @@ export class ToolModel {
    * Permanently deletes a tool. Only the owner can delete.
    */
   static async delete(id, ownerId) {
-    const result = await db.run('DELETE FROM tools WHERE id = ? AND owner_id = ?', [id, ownerId]);
-    return result.changes > 0;
+    const db = getMongoDb();
+    const result = await db.collection('tools').deleteOne({ id, owner_id: ownerId });
+    return result.deletedCount > 0;
   }
 }
