@@ -13,8 +13,7 @@ import { toolRouter } from './routes/toolRoutes.js';
 import { bookingRouter } from './routes/bookingRoutes.js';
 import { paymentRouter } from './routes/paymentRoutes.js';
 import { uploadRouter } from './routes/uploadRoutes.js';
-import { initDb } from './models/userModel.js';
-import { initMongo } from './utils/mongo.js';
+import { initMongo } from './utils/mongo.js'; // 👈 Sirf MongoDB import rakho
 import { initSentry } from './utils/sentry.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { apiLimiter } from './middlewares/rateLimiter.js';
@@ -23,16 +22,16 @@ import { swaggerDocument } from './docs/swagger.js';
 // Use Google DNS for reliable cloud connectivity
 dns.setServers(['8.8.8.8', '8.8.4.4']);
 
+const app = express();
+
 async function startServer() {
-  // Initialize primary relational database (SQLite with WAL mode and foreign key integrity)
-  await initDb();
-
-  // Concurrently attempt cloud MongoDB connection if configured
-  initMongo().catch((err) => {
-    console.warn('MongoDB initialization notice:', err.message);
-  });
-
-  const app = express();
+  try {
+    // 🚀 Initialize Cloud MongoDB Connection
+    await initMongo();
+    console.log('✅ MongoDB connection verified for server startup.');
+  } catch (err) {
+    console.error('❌ Failed to connect to MongoDB:', err.message);
+  }
 
   // Initialize Sentry Monitoring
   const sentry = initSentry(app);
@@ -40,7 +39,7 @@ async function startServer() {
 
   // Security Middleware
   app.use(helmet({
-    contentSecurityPolicy: false, // Allows Swagger UI and local development embedding
+    contentSecurityPolicy: false,
     crossOriginEmbedderPolicy: false,
   }));
 
@@ -56,18 +55,17 @@ async function startServer() {
 
   app.use(cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl, or server-to-server)
       if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
-      return callback(null, true); // Permissive in dev, or specify strict matching
+      return callback(null, true);
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'stripe-signature'],
   }));
 
-  // Body Parsers: Capture raw buffer on JSON for Stripe webhook signature verification
+  // Body Parsers
   app.use(express.json({
     limit: '10mb',
     verify: (req, res, buf) => {
@@ -76,10 +74,10 @@ async function startServer() {
   }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-  // General Rate Limiting for all /api endpoints
+  // General Rate Limiting
   app.use('/api', apiLimiter);
 
-  // Interactive Swagger/OpenAPI Documentation
+  // Interactive Swagger Documentation
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
     customSiteTitle: 'ToolTrunk REST API Documentation',
   }));
@@ -96,7 +94,7 @@ async function startServer() {
 
   // Mount API Routers
   app.use('/api/auth', authRouter);
-  app.use('/api', authRouter); // Compatibility mapping for profile/reputation routes
+  app.use('/api', authRouter);
   app.use('/api/tools', toolRouter);
   app.use('/api/bookings', bookingRouter);
   app.use('/api/payments', paymentRouter);
@@ -110,14 +108,20 @@ async function startServer() {
 
   const PORT = process.env.PORT || 5000;
 
-  app.listen(PORT, () => {
-    console.log(`🚀 ToolTrunk backend server running on http://localhost:${PORT}`);
-    console.log(`📖 API Documentation available at http://localhost:${PORT}/api-docs`);
-    console.log(`🩺 Health check: http://localhost:${PORT}/api/health`);
-  });
+  // Local development ke liye app.listen (Vercel serverless mein automatic handle hota hai)
+  if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+      console.log(`🚀 ToolTrunk backend server running on http://localhost:${PORT}`);
+      console.log(`📖 API Documentation available at http://localhost:${PORT}/api-docs`);
+      console.log(`🩺 Health check: http://localhost:${PORT}/api/health`);
+    });
+  }
 }
 
 startServer().catch((err) => {
   console.error('Failed to start ToolTrunk server:', err);
   process.exit(1);
 });
+
+// Vercel serverless function ke liye app export karna zaroori hai
+export default app;
