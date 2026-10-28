@@ -3,7 +3,7 @@ import { BookingModel } from '../models/bookingModel.js';
 import { ToolModel } from '../models/toolModel.js';
 import { UserModel } from '../models/userModel.js';
 import { emailService } from '../services/emailService.js';
-import { db } from '../utils/db.js';
+import { getMongoDb } from '../utils/mongo.js';
 
 // Cache processed event IDs for webhook idempotency
 const processedEvents = new Set();
