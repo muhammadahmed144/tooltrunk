@@ -1,0 +1,25 @@
+{
+  "name": "tooltrunk-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^14.2.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "lucide-react": "^0.453.0",
+    "motion": "^11.11.9"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.0",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "14.2.5",
+    "tailwindcss": "^4.0.0"
+  }
+}
