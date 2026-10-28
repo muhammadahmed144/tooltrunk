@@ -37,6 +37,8 @@ app.get('/', (req, res) => {
 
 const app = express();
 
+app.set('trust proxy', 1);
+
 async function startServer() {
   try {
     // 🚀 Initialize Cloud MongoDB Connection
