@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # In-memory Caching & Rate Limiting Engine
+  redis:
+    image: redis:7-alpine
+    container_name: tooltrunk-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+
+  # Express REST API Backend
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: tooltrunk-backend
+    restart: unless-stopped
+    ports:
+      - '5000:5000'
+    environment:
+      - PORT=5000
+      - NODE_ENV=development
+      - CLIENT_URL=http://localhost:3000
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET:-tooltrunk_jwt_secret_dev_key_987654321}
+      - JWT_EXPIRES_IN=7d
+      - MONGODB_URI=${MONGODB_URI}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - EMAIL_FROM=${EMAIL_FROM}
+      - SENTRY_DSN=${SENTRY_DSN}
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - backend_db:/app/tooltrunk_storage
+
+  # Next.js Frontend
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:5000/api
+    container_name: tooltrunk-frontend
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://localhost:5000/api
+      - BACKEND_URL=http://backend:5000
+    depends_on:
+      - backend
+
+volumes:
+  redis_data:
+  backend_db:
