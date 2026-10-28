@@ -22,6 +22,19 @@ import { swaggerDocument } from './docs/swagger.js';
 // Use Google DNS for reliable cloud connectivity
 dns.setServers(['8.8.8.8', '8.8.4.4']);
 
+app.get('/', (req, res) => {
+  res.send(`
+    <div style="font-family: Arial, sans-serif; text-align: center; margin-top: 50px; padding: 20px;">
+      <h1 style="color: #2e7d32; font-size: 2.5rem;">🚀 ToolTrunk Backend is Running Successfully!</h1>
+      <p style="font-size: 1.2rem; color: #555;">Your SaaS Production API is up, connected to MongoDB & Redis, and ready for action.</p>
+      <div style="margin-top: 30px;">
+        <a href="/api/health" style="margin-right: 20px; padding: 10px 20px; background: #2e7d32; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">Health Check</a>
+        <a href="/api-docs" style="padding: 10px 20px; background: #1976d2; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">API Documentation</a>
+      </div>
+    </div>
+  `);
+});
+
 const app = express();
 
 async function startServer() {
