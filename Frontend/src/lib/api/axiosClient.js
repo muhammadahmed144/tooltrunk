@@ -6,7 +6,7 @@ const getBaseUrl = () => {
     return process.env.NEXT_PUBLIC_API_URL;
   }
   // Default to relative /api for local dev proxy or direct fallback
-  return typeof window !== 'undefined' ? '/api' : 'http://localhost:5000/api';
+  return typeof window !== 'undefined' ? '/api' : 'http://localhost:3000/api';
 };
 
 export const axiosInstance = axios.create({
