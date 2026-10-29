@@ -1,5 +1,5 @@
-import crypto from 'crypto';
-import { getMongoDb } from '../utils/mongo.js';
+import crypto from "crypto";
+import { getMongoDb } from "../utils/mongo.js";
 
 function mapBookingDoc(doc) {
   if (!doc) return undefined;
@@ -31,7 +31,7 @@ export class BookingModel {
    */
   static async findById(id) {
     const db = await getMongoDb();
-    const doc = await db.collection('bookings').findOne({ id });
+    const doc = await db.collection("bookings").findOne({ id });
     return mapBookingDoc(doc);
   }
 
@@ -40,7 +40,8 @@ export class BookingModel {
    */
   static async findByBorrower(borrowerId) {
     const db = await getMongoDb();
-    const docs = await db.collection('bookings')
+    const docs = await db
+      .collection("bookings")
       .find({ borrower_id: borrowerId })
       .sort({ created_at: -1 })
       .toArray();
@@ -52,7 +53,8 @@ export class BookingModel {
    */
   static async findByOwner(ownerId) {
     const db = await getMongoDb();
-    const docs = await db.collection('bookings')
+    const docs = await db
+      .collection("bookings")
       .find({ owner_id: ownerId })
       .sort({ created_at: -1 })
       .toArray();
@@ -83,13 +85,20 @@ export class BookingModel {
       end_date: bookingData.endDate,
       total_days: Number(bookingData.totalDays),
       total_price: Number(bookingData.totalPrice),
-      status: bookingData.status || 'Pending',
+      status: bookingData.status || "Pending",
       created_at: now,
       updated_at: now,
     };
 
-    await db.collection('bookings').insertOne(newBookingDoc);
+    await db.collection("bookings").insertOne(newBookingDoc);
     return await BookingModel.findById(id);
+  }
+
+  /**
+   * Creates a new booking atomically (wrapper for create).
+   */
+  static async createAtomic(bookingData) {
+    return await BookingModel.create(bookingData);
   }
 
   /**
@@ -98,10 +107,9 @@ export class BookingModel {
   static async updateStatus(id, status) {
     const db = await getMongoDb();
     const now = new Date().toISOString();
-    await db.collection('bookings').updateOne(
-      { id },
-      { $set: { status, updated_at: now } }
-    );
+    await db
+      .collection("bookings")
+      .updateOne({ id }, { $set: { status, updated_at: now } });
     return await BookingModel.findById(id);
   }
 
@@ -110,7 +118,7 @@ export class BookingModel {
    */
   static async delete(id) {
     const db = await getMongoDb();
-    const result = await db.collection('bookings').deleteOne({ id });
+    const result = await db.collection("bookings").deleteOne({ id });
     return result.deletedCount > 0;
   }
 }
