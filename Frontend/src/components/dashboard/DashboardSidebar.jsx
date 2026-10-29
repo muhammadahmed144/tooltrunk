@@ -117,7 +117,7 @@ export default function DashboardSidebar({ activeView, setActiveView }) {
       </div>
 
       {/* Community Banner Matching Screenshot */}
-      <div className="bg-gradient-to-br from-emerald-900 via-emerald-900 to-[#0b1320] text-white p-4 rounded-2xl relative overflow-hidden shadow-sm">
+      <div className="bg-linear-to-br from-emerald-900 via-emerald-900 to-[#0b1320] text-white p-4 rounded-2xl relative overflow-hidden shadow-sm">
         <div className="relative z-10 space-y-1.5">
           <div className="flex items-center gap-1.5 text-emerald-400 font-bold text-xs">
             <Users className="w-3.5 h-3.5" />

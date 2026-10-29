@@ -153,7 +153,7 @@ export default function OverviewTab({ user, tierInfo, onAddReputation, updatingR
             <p className="text-xs text-slate-400 mb-6">General neighborhood coverage based on your search radius.</p>
           </div>
           <div className="relative flex items-center justify-center bg-slate-950/80 border border-slate-900 rounded-2xl p-6 h-64 overflow-hidden">
-            <svg className="w-full h-full max-w-[240px] max-h-[240px]" viewBox="0 0 300 300">
+            <svg className="w-full h-full max-w-60 max-h-60" viewBox="0 0 300 300">
               <circle cx="150" cy="150" r="140" fill="none" stroke="#312e81" strokeWidth="1" strokeDasharray="4 4" />
               <circle cx="150" cy="150" r="100" fill="none" stroke="#312e81" strokeWidth="1" />
               <circle cx="150" cy="150" r="60" fill="none" stroke="#312e81" strokeWidth="1" strokeDasharray="2 2" />

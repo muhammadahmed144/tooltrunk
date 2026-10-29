@@ -55,7 +55,7 @@ export default function UserHeroCard({ user, stats, tierInfo }) {
         </div>
 
         <div className="flex flex-wrap gap-4 sm:gap-6">
-          <div className="bg-slate-950/60 border border-slate-900 px-6 py-4 rounded-2xl flex items-center gap-4 min-w-[155px] shadow-sm">
+          <div className="bg-slate-950/60 border border-slate-900 px-6 py-4 rounded-2xl flex items-center gap-4 min-w-38.75 shadow-sm">
             <div className="w-11 h-11 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
               <Award className="w-6 h-6" />
             </div>
@@ -64,7 +64,7 @@ export default function UserHeroCard({ user, stats, tierInfo }) {
               <span className="text-xl font-black text-white">{user.reputation} pts</span>
             </div>
           </div>
-          <div className="bg-slate-950/60 border border-slate-900 px-6 py-4 rounded-2xl flex items-center gap-4 min-w-[155px] shadow-sm">
+          <div className="bg-slate-950/60 border border-slate-900 px-6 py-4 rounded-2xl flex items-center gap-4 min-w-38.75 shadow-sm">
             <div className="w-11 h-11 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
               <Handshake className="w-6 h-6" />
             </div>
@@ -73,7 +73,7 @@ export default function UserHeroCard({ user, stats, tierInfo }) {
               <span className="text-xl font-black text-white">{stats.totalTools} Tools</span>
             </div>
           </div>
-          <div className="bg-slate-950/60 border border-slate-900 px-6 py-4 rounded-2xl flex items-center gap-4 min-w-[155px] shadow-sm">
+          <div className="bg-slate-950/60 border border-slate-900 px-6 py-4 rounded-2xl flex items-center gap-4 min-w-38.75 shadow-sm">
             <div className="w-11 h-11 rounded-xl bg-sky-500/10 flex items-center justify-center text-sky-400">
               <Sliders className="w-6 h-6" />
             </div>

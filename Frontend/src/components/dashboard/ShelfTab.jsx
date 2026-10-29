@@ -220,7 +220,7 @@ export default function ShelfTab({
         </div>
 
         {/* Tool Inventory */}
-        <div className="bg-slate-900/30 border border-slate-900 rounded-2xl p-6 sm:p-8 flex-grow">
+        <div className="bg-slate-900/30 border border-slate-900 rounded-2xl p-6 sm:p-8 grow">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-bold text-white flex items-center gap-2.5">
               <Package className="w-5 h-5 text-indigo-400" /> My Tools Inventory

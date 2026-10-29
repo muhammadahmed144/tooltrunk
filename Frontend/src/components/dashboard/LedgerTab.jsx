@@ -59,7 +59,7 @@ export default function LedgerTab({ user }) {
         </div>
       </div>
 
-      <div className="space-y-3.5 max-h-[450px] overflow-y-auto pr-1">
+      <div className="space-y-3.5 max-h-112.5 overflow-y-auto pr-1">
         {filteredLedger.length === 0 ? (
           <div className="text-center text-slate-500 py-12 text-sm">No ledger matches found.</div>
         ) : (

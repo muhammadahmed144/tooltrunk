@@ -68,7 +68,7 @@ export default function Navbar() {
           {/* Right: Search Bar, Location Pill, Notification, User / Auth */}
           <div className="hidden sm:flex items-center gap-4 flex-1 justify-end max-w-md">
             {/* Search Input */}
-            <form onSubmit={handleSearchSubmit} className="relative flex-1 max-w-[200px] lg:max-w-[240px]">
+            <form onSubmit={handleSearchSubmit} className="relative flex-1 max-w-50 lg:max-w-60">
               <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"

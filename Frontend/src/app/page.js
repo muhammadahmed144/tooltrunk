@@ -103,7 +103,7 @@ export default function HomePage() {
         {/* Hero Section */}
         <section className="relative bg-[#0b1320] text-white overflow-hidden py-16 lg:py-24 border-b border-slate-800">
           {/* Subtle workshop background texture */}
-          <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#10b981_1px,transparent_1px)] bg-[size:20px]" />
+          <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#10b981_1px,transparent_1px)] bg-size-[20px]" />
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
