@@ -30,7 +30,7 @@ export class BookingModel {
    * Finds a single booking by its ID.
    */
   static async findById(id) {
-    const db = getMongoDb();
+    const db = await getMongoDb();
     const doc = await db.collection('bookings').findOne({ id });
     return mapBookingDoc(doc);
   }
@@ -39,7 +39,7 @@ export class BookingModel {
    * Finds all bookings made by a specific borrower.
    */
   static async findByBorrower(borrowerId) {
-    const db = getMongoDb();
+    const db = await getMongoDb();
     const docs = await db.collection('bookings')
       .find({ borrower_id: borrowerId })
       .sort({ created_at: -1 })
@@ -51,7 +51,7 @@ export class BookingModel {
    * Finds all bookings for tools owned by a specific user.
    */
   static async findByOwner(ownerId) {
-    const db = getMongoDb();
+    const db = await getMongoDb();
     const docs = await db.collection('bookings')
       .find({ owner_id: ownerId })
       .sort({ created_at: -1 })
@@ -63,7 +63,7 @@ export class BookingModel {
    * Creates a new booking record in MongoDB.
    */
   static async create(bookingData) {
-    const db = getMongoDb();
+    const db = await getMongoDb();
     const id = crypto.randomUUID();
     const now = new Date().toISOString();
 
@@ -96,7 +96,7 @@ export class BookingModel {
    * Updates booking status (e.g., Pending -> Approved, Borrowed, etc.)
    */
   static async updateStatus(id, status) {
-    const db = getMongoDb();
+    const db = await getMongoDb();
     const now = new Date().toISOString();
     await db.collection('bookings').updateOne(
       { id },
@@ -109,7 +109,7 @@ export class BookingModel {
    * Deletes a booking record by ID.
    */
   static async delete(id) {
-    const db = getMongoDb();
+    const db = await getMongoDb();
     const result = await db.collection('bookings').deleteOne({ id });
     return result.deletedCount > 0;
   }

@@ -56,7 +56,7 @@ export class ToolModel {
    * Public discovery endpoint supporting search query, category, and postal code.
    */
   static async findPublic({ search, category, postalCode } = {}) {
-    const db = getMongoDb();
+    const db = await getMongoDb();
     const query = {};
 
     if (category && category !== 'All Categories') {
@@ -86,7 +86,7 @@ export class ToolModel {
    * Finds all tools owned by a specific user.
    */
   static async findByOwner(ownerId) {
-    const db = getMongoDb();
+    const db = await getMongoDb();
     const docs = await db.collection('tools').find({ owner_id: ownerId }).sort({ created_at: -1 }).toArray();
     return docs.map(mapToolDoc);
   }
@@ -95,7 +95,7 @@ export class ToolModel {
    * Finds a single tool by its ID.
    */
   static async findById(id) {
-    const db = getMongoDb();
+    const db = await getMongoDb();
     const doc = await db.collection('tools').findOne({ id });
     return mapToolDoc(doc);
   }
@@ -104,7 +104,7 @@ export class ToolModel {
    * Creates a new tool record in MongoDB.
    */
   static async create(toolData) {
-    const db = getMongoDb();
+    const db = await getMongoDb();
     const id = crypto.randomUUID();
     const now = new Date().toISOString();
     const price = Number(toolData.pricePerDay || toolData.dailyPoints || 500);
@@ -152,7 +152,7 @@ export class ToolModel {
    * Updates an existing tool record. Only the owner can update.
    */
   static async update(id, ownerId, updates) {
-    const db = getMongoDb();
+    const db = await getMongoDb();
     const existing = await ToolModel.findById(id);
     if (!existing || existing.ownerId !== ownerId) {
       return null;
@@ -206,7 +206,7 @@ export class ToolModel {
    * Permanently deletes a tool. Only the owner can delete.
    */
   static async delete(id, ownerId) {
-    const db = getMongoDb();
+    const db = await getMongoDb();
     const result = await db.collection('tools').deleteOne({ id, owner_id: ownerId });
     return result.deletedCount > 0;
   }

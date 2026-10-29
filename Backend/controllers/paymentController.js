@@ -105,9 +105,10 @@ export class PaymentController {
           const booking = await BookingModel.findById(bookingId);
           if (booking) {
             // Update payment record in database
-            await db.run(
-              'UPDATE bookings SET updated_at = ? WHERE id = ?',
-              [new Date().toISOString(), bookingId]
+            const db = await getMongoDb();
+            await db.collection('bookings').updateOne(
+              { id: bookingId },
+              { $set: { updated_at: new Date().toISOString() } }
             );
 
             // Send payment confirmation email asynchronously
